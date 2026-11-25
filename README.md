@@ -23,18 +23,16 @@ use ItmoSoft\Inventory\Services\InventoryManager;
 $warehouse = StockLocation::create(['name' => 'Main Warehouse', 'code' => 'MAIN']);
 $inventory = app(InventoryManager::class);
 
-// Receive 100 units.
 $inventory->receive($product, $warehouse, 100, 'PO-1001');
 
-// Reserve 4 units for an order.
 $reservation = $inventory->reserve($product, $warehouse, 4, 'ORDER-5001');
 
-// Release a cancelled order's reservation.
 $inventory->release($reservation);
-
 // Or fulfill it: both on-hand and reserved quantities decrease.
-$movement = $inventory->fulfill($reservation);
+// $movement = $inventory->fulfill($reservation);
 ```
+
+Inventory items and locations must be persisted Eloquent models before stock operations. Initial stock-row creation uses the database unique constraint safely so concurrent first-time requests do not both attempt to create the same stock record.
 
 ## Adjustments
 ```php
@@ -55,7 +53,7 @@ $stock->reservations;
 ## Configuration
 Publish `config/inventory.php` with `php artisan vendor:publish --tag=inventory-config`.
 - `table_prefix`: default `inventory_`; configure before running migrations.
-- `models`: model classes used by package relationships.
+- `models`: model classes used by package relationships. Custom stock item classes must extend the package `StockItem` model and preserve its table/relationship contract.
 
 Tables: `inventory_locations`, `inventory_stock_items`, `inventory_movements`, `inventory_reservations`.
 
